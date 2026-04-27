@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘의 감정 기록장</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      background-color: #f7f9f2; /* 연한 노랑초록 배경 */
+    }
+    .main-card {
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+      border-radius: 2.5rem;
+      border: 1px solid #e1e8d1;
+    }
+    .badge-blue {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.6rem;
+      border-radius: 9999px;
+      margin-left: 0.6rem;
+    }
+    .badge-green {
+      background-color: #dcfce7;
+      color: #15803d;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.6rem;
+      border-radius: 9999px;
+      margin-left: 0.6rem;
+    }
+    .input-field {
+      border: 2px solid #eef2e6;
+      transition: all 0.3s;
+    }
+    .input-field:focus {
+      border-color: #aed581; /* 노랑초록색 */
+      box-shadow: 0 0 0 4px rgba(174, 213, 129, 0.2);
+      outline: none;
+      background-color: white;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #aed581 0%, #8bc34a 100%);
+      box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(139, 195, 74, 0.4);
+    }
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+    .feedback-box {
+      background-color: #fdfdfd;
+      border: 1px solid #eef2e6;
+      border-radius: 1.8rem;
+    }
+    .loading-spinner {
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-top: 3px solid #8bc34a;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .animate-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+  <div class="main-card bg-white w-full max-w-lg p-8 md:p-10 space-y-7">
+    <!-- 헤더 -->
+    <div class="flex items-center space-x-4">
+      <div class="text-5xl bg-yellow-50 p-2 rounded-full">😊</div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">오늘의 감정 기록장</h1>
+        <p class="text-sm text-slate-500 mt-1">선생님에게 네 마음을 들려주면 다정한 피드백을 줄게.</p>
+      </div>
+    </div>
+
+    <!-- 입력 폼 -->
+    <div class="space-y-6">
+      <!-- 학생 이름 -->
+      <div>
+        <label class="flex items-center text-slate-700 font-bold mb-2 ml-1">
+          학생 이름 <span class="badge-blue">필수</span>
+        </label>
+        <input type="text" id="studentName" class="input-field w-full p-4 rounded-2xl bg-slate-50 text-slate-700" placeholder="이름을 알려주세요">
+      </div>
+
+      <!-- 감정 키워드 -->
+      <div>
+        <label class="flex items-center text-slate-700 font-bold mb-2 ml-1">
+          오늘의 감정 키워드 <span class="badge-blue">필수</span>
+        </label>
+        <input type="text" id="keywords" class="input-field w-full p-4 rounded-2xl bg-slate-50 text-slate-700" placeholder="예: 즐거움, 조금 슬픔, 신남">
+        <p class="text-[0.75rem] text-slate-400 mt-2 px-1 leading-snug">지금 네 마음이 어떤지 단어로 적어보자. 여러 개도 괜찮아!</p>
+      </div>
+
+      <!-- 느낀 이유 -->
+      <div>
+        <label class="flex items-center text-slate-700 font-bold mb-2 ml-1">
+          그렇게 느낀 이유 <span class="badge-green">간단하게</span>
+        </label>
+        <textarea id="reason" rows="3" class="input-field w-full p-4 rounded-2xl bg-slate-50 text-slate-700 resize-none" placeholder="오늘 왜 그런 기분이 들었는지 선생님께 살짝 들려줄래?"></textarea>
+      </div>
+    </div>
+
+    <!-- 버튼 및 상태 -->
+    <div class="flex flex-col items-end space-y-4">
+      <div id="statusMessage" class="hidden text-sm text-green-600 font-bold flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+        성공적으로 기록되었어요!
+      </div>
+      <button id="submitBtn" onclick="handleSubmit()" class="btn-submit flex items-center justify-center space-x-3 text-white px-10 py-4 rounded-full font-extrabold w-full sm:w-auto">
+        <span id="btnText">감정 기록하기</span>
+        <div id="btnSpinner" class="loading-spinner hidden"></div>
+        <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+      </button>
+    </div>
+
+    <!-- 피드백 카드 -->
+    <div id="feedbackCard" class="hidden">
+      <div class="feedback-box p-7 relative shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-green-700 font-extrabold flex items-center">
+            🌱 사회·정서 피드백
+          </h3>
+          <span class="text-[0.7rem] px-3 py-1 bg-white border border-slate-200 rounded-full text-slate-400 font-bold">선생님 코멘트</span>
+        </div>
+        <p id="aiFeedback" class="text-slate-600 leading-relaxed text-sm md:text-base font-medium">
+          <!-- 피드백 내용 -->
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 성공 시 UI 업데이트 처리
+     */
+    function handleSuccess(response) {
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnIcon = document.getElementById('btnIcon');
+      const btnSpinner = document.getElementById('btnSpinner');
+      const statusMsg = document.getElementById('statusMessage');
+      const feedbackCard = document.getElementById('feedbackCard');
+
+      if (response.success) {
+        statusMsg.classList.remove('hidden');
+        feedbackCard.classList.remove('hidden');
+        feedbackCard.classList.add('animate-up');
+        document.getElementById('aiFeedback').innerText = response.feedback;
+        
+        btnText.innerText = "기록 완료!";
+        btnSpinner.classList.add('hidden');
+        btnIcon.classList.remove('hidden');
+        btn.classList.replace('btn-submit', 'bg-slate-300');
+        btn.style.boxShadow = "none";
+        btn.style.transform = "none";
+      } else {
+        alert(response.error);
+        resetBtn();
+      }
+    }
+
+    /**
+     * 전송 버튼 클릭 핸들러
+     */
+    function handleSubmit() {
+      const name = document.getElementById('studentName').value.trim();
+      const keywords = document.getElementById('keywords').value.trim();
+      const reason = document.getElementById('reason').value.trim();
+      
+      if (!name || !keywords) {
+        alert("이름과 오늘의 기분을 꼭 적어주세요! 😊");
+        return;
+      }
+
+      // UI 로딩 상태
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnIcon = document.getElementById('btnIcon');
+      const btnSpinner = document.getElementById('btnSpinner');
+      
+      btn.disabled = true;
+      btnText.innerText = "기록 중...";
+      btnIcon.classList.add('hidden');
+      btnSpinner.classList.remove('hidden');
+
+      // Google Apps Script 연동
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(handleSuccess)
+          .withFailureHandler((err) => {
+            alert("연결 오류가 발생했어요. 다시 한번 시도해볼까요?");
+            resetBtn();
+          })
+          .submitData(name, keywords, reason);
+      } else {
+        // 테스트용 시뮬레이션
+        setTimeout(() => {
+          handleSuccess({
+            success: true, 
+            feedback: "오늘 정말 많이 힘들었겠구나. 세 번이나 수행평가를 보느라 피곤하고 불안했을 너의 마음이 느껴져서 안타까워. 잘 못 본 것 같아 속상한 마음도 충분히 이해해. 하지만 네 노력이 소중하니, 조금 쉬면서 다시 힘내길 응원할게."
+          });
+        }, 1500);
+      }
+    }
+
+    function resetBtn() {
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnIcon = document.getElementById('btnIcon');
+      const btnSpinner = document.getElementById('btnSpinner');
+      btn.disabled = false;
+      btnText.innerText = "감정 기록하기";
+      btnIcon.classList.remove('hidden');
+      btnSpinner.classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>
